@@ -7,25 +7,27 @@ const selectors = {
   error: document.querySelector('.error'),
 };
 
-selectors.select.addEventListener('change', event => {
-  const selectedBreedId = event.target.value;
-  if (selectedBreedId) {
-    selectors.loader.style.display = 'block';
-    selectors.catInfo.innerHTML = '';
+function showLoader() {
+  updateLoaderVisibility(true);
+}
 
-    fetchCatByBreed(selectedBreedId)
-      .then(catData => {
-        displayCatInfo(catData);
-        selectors.loader.style.display = 'none';
-      })
-      .catch(error => {
-        selectors.error.style.display = 'block';
-        selectors.loader.style.display = 'none';
-        updateBreedDescription('Error fetching cat data. Please try again.');
-        console.error('Error fetching cat data:', error);
-      });
-  }
-});
+function hideLoader() {
+  updateLoaderVisibility(false);
+}
+
+function showError(message) {
+  selectors.error.textContent = message;
+  selectors.error.classList.add('visible');
+}
+
+function hideError() {
+  selectors.error.textContent = '';
+  selectors.error.classList.remove('visible');
+}
+
+function hideCatInfo() {
+  selectors.catInfo.innerHTML = '';
+}
 
 function updateBreedDescription(description) {
   const descriptionElement = document.querySelector('.breed-description');
@@ -49,19 +51,46 @@ function displayCatInfo(catData) {
   }
 }
 
+function updateLoaderVisibility(show) {
+  if (show) {
+    selectors.loader.classList.add('visible');
+  } else {
+    selectors.loader.classList.remove('visible');
+  }
+}
+
+selectors.select.addEventListener('change', event => {
+  const selectedBreedId = event.target.value;
+  if (selectedBreedId) {
+    hideCatInfo();
+    showLoader();
+
+    fetchCatByBreed(selectedBreedId)
+      .then(catData => {
+        displayCatInfo(catData);
+        hideLoader();
+      })
+      .catch(error => {
+        showError('Error fetching cat data. Please try again.');
+        hideLoader();
+        console.error('Error fetching cat data:', error);
+      });
+  }
+});
+
 window.addEventListener('load', () => {
-  selectors.loader.style.display = 'block';
-  selectors.catInfo.innerHTML = '';
+  hideCatInfo();
+  hideError();
+  showLoader();
 
   fetchBreeds()
     .then(breeds => {
       populateBreedsSelect(breeds);
-      selectors.loader.style.display = 'none';
-      selectors.error.style.display = 'none';
+      hideLoader();
     })
     .catch(error => {
-      selectors.error.style.display = 'block';
-      selectors.loader.style.display = 'none';
+      showError('Error fetching breeds. Please try again.');
+      hideLoader();
       console.error('Error fetching breeds:', error);
     });
 });

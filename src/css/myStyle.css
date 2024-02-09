@@ -1,0 +1,8 @@
+.loader,
+.error {
+    display: none;
+}
+
+.visible {
+    display: block !important;
+}
