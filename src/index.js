@@ -1,10 +1,12 @@
 import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
 
+import 'izitoast/dist/css/iziToast.min.css';
+import iziToast from 'izitoast/dist/js/iziToast.min.js';
+
 const selectors = {
   select: document.querySelector('.breed-select'),
   catInfo: document.querySelector('.cat-info'),
   loader: document.querySelector('.loader'),
-  error: document.querySelector('.error'),
 };
 
 function showLoader() {
@@ -16,24 +18,15 @@ function hideLoader() {
 }
 
 function showError(message) {
-  selectors.error.textContent = message;
-  selectors.error.classList.add('visible');
-}
-
-function hideError() {
-  selectors.error.textContent = '';
-  selectors.error.classList.remove('visible');
+  iziToast.error({
+    title: 'Error',
+    message: message,
+    position: 'topRight',
+  });
 }
 
 function hideCatInfo() {
   selectors.catInfo.innerHTML = '';
-}
-
-function updateBreedDescription(description) {
-  const descriptionElement = document.querySelector('.breed-description');
-  if (descriptionElement) {
-    descriptionElement.textContent = description || 'No description available';
-  }
 }
 
 function displayCatInfo(catData) {
@@ -46,8 +39,7 @@ function displayCatInfo(catData) {
       <p><strong>Temperament:</strong> ${breed.temperament}</p>
     `;
   } else {
-    selectors.catInfo.innerHTML =
-      '<p>No breed information available for this cat.</p>';
+    showError('No breed information available for this cat.');
   }
 }
 
@@ -80,7 +72,7 @@ selectors.select.addEventListener('change', event => {
 
 window.addEventListener('load', () => {
   hideCatInfo();
-  hideError();
+
   showLoader();
 
   fetchBreeds()
